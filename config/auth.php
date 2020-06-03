@@ -38,6 +38,11 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        'webldap' => [
+            'driver' => 'session',
             'provider' => 'ldap',
         ],
 

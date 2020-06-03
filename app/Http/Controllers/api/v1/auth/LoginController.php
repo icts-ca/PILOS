@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -37,7 +38,7 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->middleware('auth:api')->only('logout');
+        $this->middleware('guest:webldap')->except('logout');
     }
 
     public function username()
@@ -45,11 +46,19 @@ class LoginController extends Controller
         return 'username';
     }
 
-    protected function credentials(Request $request)
+    public function ldapLogin(Request $request)
     {
-        return [
-            'uid'      => $request->get('username'),
-            'password' => $request->get('password'),
-        ];
+        $this->validate($request, [
+            'username'   => 'required',
+            'password'   => 'required|min:6'
+        ]);
+
+        if (Auth::guard('webldap')->attempt(['uid' => $request->username, 'password' => $request->password])) {
+            return response('Login', 200);
+        }
+
+        return response()->json([
+            'errors' => [ 'username' => [__('auth.failed')]],
+        ], 401);
     }
 }

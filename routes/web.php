@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Auth::routes();
 
-Route::any('/{any}', 'ApplicationController@index')->where('any', '.*');
+
+Auth::routes();
+Route::get('/login/ldap', 'Auth\LoginController@showLdapLoginForm');
+Route::post('/login/ldap', 'Auth\LoginController@ldapLogin')->name('login.ldap');
+
+Route::group(['middleware' => 'auth:web,webldap'], function () {
+    Route::get('/', 'HomeController@index')->name('home');
+});
+
+
